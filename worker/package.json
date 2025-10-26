@@ -1,0 +1,19 @@
+{
+  "name": "bill-image-upload-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for uploading bill images to R2",
+  "main": "upload-image.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "tail": "wrangler tail"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "r2",
+    "image-upload"
+  ],
+  "author": "",
+  "license": "MIT"
+}

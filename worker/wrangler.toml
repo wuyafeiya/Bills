@@ -1,0 +1,13 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "bill-image-upload"
+main = "upload-image.js"
+compatibility_date = "2024-01-01"
+
+# R2 存储桶绑定
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "suba"  # 你的 R2 存储桶名称
+
+# 环境变量
+[vars]
+R2_PUBLIC_URL = "https://pub-49ffd365ddd048378e946d13a2317f1d.r2.dev"  # 替换为你的 R2 公开域名
