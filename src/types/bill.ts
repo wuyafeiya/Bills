@@ -88,6 +88,7 @@ export interface Bill {
 export interface BillStats {
   totalExpense: number      // 总支出
   todayExpense: number      // 今日支出
+  yesterdayExpense: number  // 昨日支出
   monthExpense: number      // 本月支出
   yearExpense: number       // 本年支出
   categoryStats: {

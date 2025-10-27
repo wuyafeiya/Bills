@@ -1,7 +1,66 @@
 <template>
   <div class="space-y-6">
-    <!-- 数据概览卡片 -->
-    <n-grid :x-gap="16" :y-gap="16" :cols="isMobile ? 1 : 2" responsive="screen">
+    <!-- 数据概览卡片 - 四个卡片横排 -->
+    <n-grid :x-gap="16" :y-gap="16" :cols="isMobile ? 2 : 4" responsive="screen">
+      <n-grid-item>
+        <n-card :bordered="false" class="stat-card stat-card-orange">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="stat-label">今日支出</div>
+              <div class="stat-value">
+                ¥<n-number-animation
+                  :from="0"
+                  :to="stats.todayExpense"
+                  :precision="2"
+                  :duration="2000"
+                  :active="true"
+                />
+              </div>
+              <div class="stat-trend">
+                <span class="stat-trend-label">
+                  较昨日
+                  <span :class="expenseChange >= 0 ? 'trend-up' : 'trend-down'">
+                    {{ expenseChange >= 0 ? '+' : '' }}{{ expenseChange.toFixed(1) }}%
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div class="stat-icon">
+              <n-icon size="32">
+                <font-awesome-icon :icon="['fas', 'calendar-day']" />
+              </n-icon>
+            </div>
+          </div>
+        </n-card>
+      </n-grid-item>
+
+      <n-grid-item>
+        <n-card :bordered="false" class="stat-card stat-card-cyan">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="stat-label">昨日支出</div>
+              <div class="stat-value">
+                ¥<n-number-animation
+                  :from="0"
+                  :to="stats.yesterdayExpense"
+                  :precision="2"
+                  :duration="2000"
+                  :active="true"
+                />
+              </div>
+              <div class="stat-description">
+                对比参考
+              </div>
+            </div>
+            <div class="stat-icon">
+              <n-icon size="32">
+                <font-awesome-icon :icon="['fas', 'history']" />
+              </n-icon>
+            </div>
+          </div>
+        </n-card>
+      </n-grid-item>
+
       <n-grid-item>
         <n-card :bordered="false" class="stat-card stat-card-pink">
           <div class="flex items-center justify-between">
@@ -15,6 +74,9 @@
                   :duration="2000"
                   :active="true"
                 />
+              </div>
+              <div class="stat-description">
+                当月累计
               </div>
             </div>
             <div class="stat-icon">
@@ -40,6 +102,9 @@
                   :active="true"
                 />
               </div>
+              <div class="stat-description">
+                累计金额
+              </div>
             </div>
             <div class="stat-icon">
               <n-icon size="32">
@@ -54,13 +119,13 @@
     <!-- 图表区域 -->
     <n-grid :x-gap="16" :y-gap="16" :cols="isMobile ? 1 : 2" responsive="screen">
       <n-grid-item>
-        <n-card title="分类占比" :bordered="false" :class="isMobile ? 'chart-card-mobile' : 'chart-card'">
+        <n-card title="分类占比" :bordered="true" :class="isMobile ? 'chart-card-mobile' : 'chart-card'">
           <CategoryPieChart :category-stats="stats.categoryStats" />
         </n-card>
       </n-grid-item>
 
       <n-grid-item>
-        <n-card title="支出趋势" :bordered="false" :class="isMobile ? 'chart-card-mobile' : 'chart-card'">
+        <n-card title="支出趋势" :bordered="true" :class="isMobile ? 'chart-card-mobile' : 'chart-card'">
           <TrendChart :trend-data="trendData" />
         </n-card>
       </n-grid-item>
@@ -96,6 +161,14 @@ import type { Bill } from '../types/bill'
 const router = useRouter()
 const { stats, trendData } = useBillStore()
 const { isMobile } = useResponsive()
+
+// 计算今日支出相比昨日的变化百分比
+const expenseChange = computed(() => {
+  if (stats.value.yesterdayExpense === 0) {
+    return stats.value.todayExpense > 0 ? 100 : 0
+  }
+  return ((stats.value.todayExpense - stats.value.yesterdayExpense) / stats.value.yesterdayExpense) * 100
+})
 
 function getCategoryLabel(category: string) {
   return CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]
@@ -216,6 +289,7 @@ const tableData = computed(() => stats.value.recentBills)
 .stat-card {
   transition: all 0.3s ease;
   cursor: pointer;
+  min-height: 120px;
 }
 
 .stat-card:hover {
@@ -256,6 +330,32 @@ const tableData = computed(() => stats.value.recentBills)
   font-weight: 700;
 }
 
+.stat-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.stat-trend {
+  margin-top: 6px;
+}
+
+.stat-trend-label {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.trend-up {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.trend-down {
+  color: #16a34a;
+  font-weight: 700;
+}
+
 .stat-icon {
   color: rgba(255, 255, 255, 0.3);
 }
@@ -278,5 +378,40 @@ const tableData = computed(() => stats.value.recentBills)
 .chart-card-mobile :deep(.n-card__content) {
   height: calc(100% - 56px);
   padding: 16px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .stat-card {
+    min-height: 100px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-icon {
+    opacity: 0.5;
+  }
+
+  .stat-icon :deep(.n-icon) {
+    font-size: 24px !important;
+  }
+}
+
+/* 平板适配 */
+@media (min-width: 768px) and (max-width: 1280px) {
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+  }
+
+  .stat-description,
+  .stat-trend-label {
+    font-size: 11px;
+  }
 }
 </style>

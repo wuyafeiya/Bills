@@ -85,6 +85,15 @@ export function createBillStore() {
     return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
   }
 
+  // 辅助函数：判断日期是否为昨天
+  function isYesterday(dateString: string) {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const date = new Date(dateString);
+    return date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear();
+  }
+
   // 辅助函数：判断日期是否为本月
   function isThisMonth(dateString: string) {
     const today = new Date();
@@ -108,6 +117,9 @@ export function createBillStore() {
 
     // 今日支出
     const todayExpense = expenseBills.filter((bill) => isToday(bill.date)).reduce((sum, bill) => sum + bill.amount, 0);
+
+    // 昨日支出
+    const yesterdayExpense = expenseBills.filter((bill) => isYesterday(bill.date)).reduce((sum, bill) => sum + bill.amount, 0);
 
     // 本月支出
     const monthExpense = expenseBills.filter((bill) => isThisMonth(bill.date)).reduce((sum, bill) => sum + bill.amount, 0);
@@ -141,6 +153,7 @@ export function createBillStore() {
     return {
       totalExpense,
       todayExpense,
+      yesterdayExpense,
       monthExpense,
       yearExpense,
       categoryStats,

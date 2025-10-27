@@ -81,7 +81,8 @@ import {
   faHeart,
   faStar,
   faFlag,
-  faImage
+  faImage,
+  faHistory
 } from '@fortawesome/free-solid-svg-icons'
 
 // Regular 风格图标（更细的线条）
@@ -167,7 +168,8 @@ library.add(
   faHeart,
   faStar,
   faFlag,
-  faImage
+  faImage,
+  faHistory
 )
 
 const app = createApp(App)
