@@ -128,7 +128,7 @@ export function createBillStore() {
     const yearExpense = expenseBills.filter((bill) => isThisYear(bill.date)).reduce((sum, bill) => sum + bill.amount, 0);
 
     // 按分类统计（仅支出）
-    const categoryMap = new Map<BillCategory, { total: number; count: number }>();
+    const categoryMap = new Map<string, { total: number; count: number }>();
 
     expenseBills.forEach((bill) => {
       const current = categoryMap.get(bill.category) || { total: 0, count: 0 };
@@ -289,7 +289,7 @@ export function createBillStore() {
   }
 
   // 根据分类筛选账单
-  function getBillsByCategory(category: BillCategory) {
+  function getBillsByCategory(category: string) {
     return bills.value.filter((bill) => bill.category === category);
   }
 

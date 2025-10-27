@@ -5,7 +5,7 @@
       <div class="flex items-center space-x-4 flex-1">
         <!-- 分类图标 -->
         <div :class="[categoryColor, 'w-12 h-12 rounded-xl flex items-center justify-center']">
-          <font-awesome-icon :icon="['fas', getCategoryIcon(bill.category)]" class="text-white text-lg" />
+          <font-awesome-icon :icon="['fas', categoryIcon]" class="text-white text-lg" />
         </div>
 
         <!-- 账单信息 -->
@@ -63,8 +63,8 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import type { Bill, BillCategory } from '../types/bill'
-import { CATEGORY_LABELS, CATEGORY_COLORS } from '../types/bill'
+import type { Bill } from '../types/bill'
+import { useCategoryStore } from '../composables/useCategoryStore'
 
 const props = defineProps<{
   bill: Bill
@@ -75,22 +75,20 @@ const emit = defineEmits<{
   delete: [id: string]
 }>()
 
-const categoryLabel = computed(() => CATEGORY_LABELS[props.bill.category])
-const categoryColor = computed(() => CATEGORY_COLORS[props.bill.category])
+const { getCategoryById } = useCategoryStore()
 
-function getCategoryIcon(category: BillCategory): string {
-  const iconMap: Record<BillCategory, string> = {
-    food: 'utensils',
-    transport: 'bus',
-    shopping: 'shopping-cart',
-    entertainment: 'film',
-    utilities: 'home',
-    health: 'heartbeat',
-    education: 'graduation-cap',
-    other: 'ellipsis-h'
-  }
-  return iconMap[category] || 'ellipsis-h'
-}
+// 获取分类信息
+const categoryInfo = computed(() => {
+  return getCategoryById(props.bill.category)
+})
+
+const categoryLabel = computed(() => categoryInfo.value?.name || '未知分类')
+const categoryColor = computed(() => {
+  const color = categoryInfo.value?.color || '#868e96'
+  // 将十六进制颜色转换为 Tailwind 样式
+  return `bg-[${color}]`
+})
+const categoryIcon = computed(() => categoryInfo.value?.icon || 'ellipsis-h')
 
 function formatDate(dateString: string) {
   const date = new Date(dateString)

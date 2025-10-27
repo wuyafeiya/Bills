@@ -79,13 +79,15 @@ import { ref, computed, h } from 'vue'
 import { NCard, NTag, NEmpty, NIcon, NButton, NSpace, NDataTable, useDialog, type DataTableColumns } from 'naive-ui'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { useBillStore } from '../composables/useBillStore'
+import { useCategoryStore } from '../composables/useCategoryStore'
 import BillFilter from './BillFilter.vue'
 import BillCalendar from './BillCalendar.vue'
 import type { Bill } from '../types/bill'
 import type { BillFilters } from './BillFilter.vue'
-import { BillType, CATEGORY_LABELS, PAYMENT_METHOD_LABELS } from '../types/bill'
+import { BillType, PAYMENT_METHOD_LABELS } from '../types/bill'
 
 const { bills, deleteBill } = useBillStore()
+const { getCategoryById } = useCategoryStore()
 const dialog = useDialog()
 
 // 定义事件
@@ -200,10 +202,21 @@ const columns: DataTableColumns<Bill> = [
   {
     title: '分类',
     key: 'category',
-    width: 100,
+    width: 120,
     align: 'center',
     render(row) {
-      return h('span', { class: 'text-sm' }, CATEGORY_LABELS[row.category])
+      const category = getCategoryById(row.category)
+      return h('div', { class: 'flex items-center justify-center space-x-2' }, [
+        h('div', {
+          class: 'w-8 h-8 rounded-lg flex items-center justify-center',
+          style: { backgroundColor: category?.color || '#6b7280' }
+        }, [
+          h(NIcon, { size: 14, color: 'white' }, {
+            default: () => h(FontAwesomeIcon, { icon: ['fas', category?.icon || 'ellipsis-h'] })
+          })
+        ]),
+        h('span', { class: 'text-sm' }, category?.name || '未知分类')
+      ])
     }
   },
   {

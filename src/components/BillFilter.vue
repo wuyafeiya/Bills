@@ -105,17 +105,16 @@ import {
 } from 'naive-ui'
 import {
   BillType,
-  BillCategory,
   PaymentMethod,
-  CATEGORY_LABELS,
   PAYMENT_METHOD_LABELS
 } from '../types/bill'
+import { useCategoryStore } from '../composables/useCategoryStore'
 
 // 筛选条件接口
 export interface BillFilters {
   keyword?: string
   type?: BillType
-  category?: BillCategory
+  category?: string  // 改为字符串类型，存储分类ID
   paymentMethod?: PaymentMethod
   dateRange?: [number, number]
 }
@@ -130,6 +129,8 @@ const emit = defineEmits<{
   'update:modelValue': [filters: BillFilters]
 }>()
 
+const { expenseCategories, getCategoryById } = useCategoryStore()
+
 // 筛选条件
 const filters = ref<BillFilters>({ ...props.modelValue })
 
@@ -138,11 +139,13 @@ const typeOptions = [
   { label: '支出', value: BillType.EXPENSE }
 ]
 
-// 分类选项
-const categoryOptions = Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
-  label,
-  value: value as BillCategory
-}))
+// 分类选项（从 LocalStorage 读取）
+const categoryOptions = computed(() => {
+  return expenseCategories.value.map(cat => ({
+    label: cat.name,
+    value: cat.id
+  }))
+})
 
 // 支付方式选项
 const paymentMethodOptions = Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => ({
@@ -182,9 +185,10 @@ const activeFilters = computed(() => {
   }
 
   if (filters.value.category) {
+    const category = getCategoryById(filters.value.category)
     result.push({
       key: 'category',
-      label: `分类: ${CATEGORY_LABELS[filters.value.category]}`,
+      label: `分类: ${category?.name || '未知'}`,
       type: 'warning'
     })
   }

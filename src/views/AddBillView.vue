@@ -21,7 +21,7 @@
         <!-- 标题区域 -->
         <div class="header-content">
           <div class="icon-wrapper">
-            <n-icon size="48" :color="editingBill ? '#18a058' : '#2080f0'">
+            <n-icon size="36" :color="editingBill ? '#18a058' : '#2080f0'">
               <font-awesome-icon :icon="['fas', editingBill ? 'edit' : 'plus']" />
             </n-icon>
           </div>
@@ -53,31 +53,6 @@
             @cancel="router.back()"
           />
         </n-card>
-
-        <!-- 底部提示 -->
-        <div class="tips-section">
-          <n-alert type="info" :bordered="false" class="tips-alert">
-            <template #icon>
-              <n-icon>
-                <font-awesome-icon :icon="['fas', 'circle-check']" />
-              </n-icon>
-            </template>
-            <div class="tips-content">
-              <div class="tip-item">
-                <n-icon size="16" color="#2080f0">
-                  <font-awesome-icon :icon="['fas', 'tag']" />
-                </n-icon>
-                <span>可以使用标签来分类和标记您的账单</span>
-              </div>
-              <div class="tip-item">
-                <n-icon size="16" color="#2080f0">
-                  <font-awesome-icon :icon="['fas', 'calendar']" />
-                </n-icon>
-                <span>记录准确的日期有助于后续的统计分析</span>
-              </div>
-            </div>
-          </n-alert>
-        </div>
       </div>
     </div>
   </div>
@@ -117,8 +92,8 @@ function handleSubmitted() {
 }
 
 .header-section {
-  padding: 2rem 1.5rem 3rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem 1.5rem 2rem;
+  background: linear-gradient(135deg, #18a058 0%, #36ad6a 100%);
   position: relative;
   overflow: hidden;
 }
@@ -155,7 +130,7 @@ function handleSubmitted() {
 
 .back-button {
   color: white !important;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   opacity: 0.9;
   transition: opacity 0.2s;
   position: relative;
@@ -177,32 +152,32 @@ function handleSubmitted() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 96px;
-  height: 96px;
+  width: 72px;
+  height: 72px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   border-radius: 50%;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .page-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.5rem 0;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .page-description {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   margin: 0;
   opacity: 0.95;
   font-weight: 300;
 }
 
 .form-section {
-  padding: 0 1.5rem 3rem;
-  margin-top: -2rem;
+  padding: 0 1.5rem 2rem;
+  margin-top: -1.5rem;
   position: relative;
   z-index: 2;
 }
@@ -214,31 +189,13 @@ function handleSubmitted() {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.form-card :deep(.n-card__content) {
+  padding: 1.5rem !important;
+}
+
 .form-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12) !important;
-}
-
-.tips-section {
-  margin-top: 2rem;
-}
-
-.tips-alert {
-  border-radius: 12px !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04) !important;
-}
-
-.tips-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.tip-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.95rem;
 }
 
 /* 移动端适配 */
@@ -269,14 +226,6 @@ function handleSubmitted() {
     padding: 0 1rem 2rem;
     margin-top: -1.5rem;
   }
-
-  .tips-content {
-    gap: 0.5rem;
-  }
-
-  .tip-item {
-    font-size: 0.875rem;
-  }
 }
 
 /* 平板适配 */
@@ -304,9 +253,5 @@ function handleSubmitted() {
 
 .form-card {
   animation: fadeInUp 0.4s ease-out;
-}
-
-.tips-section {
-  animation: fadeInUp 0.5s ease-out 0.1s both;
 }
 </style>

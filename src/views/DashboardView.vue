@@ -153,13 +153,14 @@ import type { DataTableColumns } from 'naive-ui'
 import { NCard, NStatistic, NGrid, NGridItem, NDataTable, NIcon, NTag, NNumberAnimation } from 'naive-ui'
 import { useBillStore } from '../composables/useBillStore'
 import { useResponsive } from '../composables/useResponsive'
+import { useCategoryStore } from '../composables/useCategoryStore'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
 import TrendChart from '../components/TrendChart.vue'
-import { CATEGORY_LABELS } from '../types/bill'
 import type { Bill } from '../types/bill'
 
 const router = useRouter()
 const { stats, trendData } = useBillStore()
+const { getCategoryById } = useCategoryStore()
 const { isMobile } = useResponsive()
 
 // 计算今日支出相比昨日的变化百分比
@@ -170,8 +171,9 @@ const expenseChange = computed(() => {
   return ((stats.value.todayExpense - stats.value.yesterdayExpense) / stats.value.yesterdayExpense) * 100
 })
 
-function getCategoryLabel(category: string) {
-  return CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]
+function getCategoryLabel(categoryId: string) {
+  const category = getCategoryById(categoryId)
+  return category?.name || '未知分类'
 }
 
 function formatDate(dateString: string) {

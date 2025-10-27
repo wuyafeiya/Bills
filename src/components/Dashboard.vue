@@ -164,10 +164,10 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useBillStore } from '../composables/useBillStore'
+import { useCategoryStore } from '../composables/useCategoryStore'
 import StatsCard from './StatsCard.vue'
 import CategoryPieChart from './CategoryPieChart.vue'
 import TrendChart from './TrendChart.vue'
-import { CATEGORY_LABELS } from '../types/bill'
 
 const emit = defineEmits<{
   addBill: []
@@ -175,11 +175,13 @@ const emit = defineEmits<{
 }>()
 
 const { stats, trendData } = useBillStore()
+const { getCategoryById } = useCategoryStore()
 
 const balance = computed(() => stats.value.totalIncome - stats.value.totalExpense)
 
-function getCategoryLabel(category: string) {
-  return CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]
+function getCategoryLabel(categoryId: string) {
+  const category = getCategoryById(categoryId)
+  return category?.name || '未知分类'
 }
 
 function formatDate(dateString: string) {

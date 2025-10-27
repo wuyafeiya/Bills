@@ -37,7 +37,7 @@ import {
   LegendComponent
 } from 'echarts/components'
 import type { EChartsOption } from 'echarts'
-import { CATEGORY_LABELS, type BillCategory } from '../types/bill'
+import { useCategoryStore } from '../composables/useCategoryStore'
 
 // 注册 ECharts 组件
 use([
@@ -50,33 +50,23 @@ use([
 
 const props = defineProps<{
   categoryStats: {
-    category: BillCategory
+    category: string  // 改为字符串类型
     total: number
     count: number
     percentage: number
   }[]
 }>()
 
-// 颜色映射
-const colorMap: Record<string, string> = {
-  food: '#f97316',
-  transport: '#3b82f6',
-  shopping: '#ec4899',
-  entertainment: '#a855f7',
-  utilities: '#22c55e',
-  health: '#ef4444',
-  education: '#eab308',
-  salary: '#10b981',
-  bonus: '#14b8a6',
-  other: '#6b7280'
+const { getCategoryById } = useCategoryStore()
+
+function getCategoryLabel(categoryId: string) {
+  const category = getCategoryById(categoryId)
+  return category?.name || '未知分类'
 }
 
-function getCategoryLabel(category: BillCategory) {
-  return CATEGORY_LABELS[category]
-}
-
-function getCategoryColor(category: BillCategory) {
-  return colorMap[category] || '#6b7280'
+function getCategoryColor(categoryId: string) {
+  const category = getCategoryById(categoryId)
+  return category?.color || '#6b7280'
 }
 
 // ECharts 配置

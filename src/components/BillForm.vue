@@ -278,10 +278,10 @@
         v-model:value="formData.description"
         type="textarea"
         placeholder="添加备注说明（可选）"
-        :rows="3"
+        :rows="2"
         :autosize="{
-          minRows: 3,
-          maxRows: 5
+          minRows: 2,
+          maxRows: 4
         }"
         size="large"
       />
@@ -289,7 +289,7 @@
 
     <!-- 按钮组 -->
     <n-form-item>
-      <n-space style="width: 100%; margin-top: 1rem" :size="12">
+      <n-space style="width: 100%; margin-top: 0.5rem" :size="12">
         <n-button
           type="primary"
           attr-type="submit"
@@ -347,6 +347,7 @@ import {
   type FormItemRule
 } from 'naive-ui'
 import { useBillStore } from '../composables/useBillStore'
+import { useCategoryStore } from '../composables/useCategoryStore'
 import { useResponsive } from '../composables/useResponsive'
 import type { Bill } from '../types/bill'
 import {
@@ -373,6 +374,7 @@ const emit = defineEmits<{
 }>()
 
 const { addBill, updateBill } = useBillStore()
+const { expenseCategories } = useCategoryStore()
 const { isMobile } = useResponsive()
 const message = useMessage()
 const formRef = ref<FormInst | null>(null)
@@ -383,7 +385,7 @@ const formData = ref({
   type: BillType.EXPENSE,
   title: '',
   amount: 0,
-  category: '' as BillCategory | '',
+  category: '' as string,  // 改为字符串类型，存储分类ID
   date: getTodayDateString(),
   paymentMethod: undefined as PaymentMethod | undefined,
   tags: [] as string[],
@@ -431,11 +433,11 @@ const rules: FormRules = {
   ]
 }
 
-// 分类选项（只有支出分类）
+// 分类选项（从 LocalStorage 读取自定义分类）
 const categoryOptions = computed(() => {
-  return EXPENSE_CATEGORIES.map(cat => ({
-    label: CATEGORY_LABELS[cat],
-    value: cat
+  return expenseCategories.value.map(cat => ({
+    label: cat.name,
+    value: cat.id
   }))
 })
 
@@ -536,7 +538,7 @@ function resetForm() {
 
 <style scoped>
 .bill-form {
-  padding: 0.5rem 0;
+  padding: 0;
 }
 
 .type-tag {
@@ -547,7 +549,7 @@ function resetForm() {
 
 /* 表单项间距优化 */
 .bill-form :deep(.n-form-item) {
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .bill-form :deep(.n-form-item:last-child) {
@@ -628,7 +630,7 @@ function resetForm() {
   }
 
   .bill-form :deep(.n-form-item) {
-    margin-bottom: 1rem;
+    margin-bottom: 0.6rem;
   }
 
   .type-tag {

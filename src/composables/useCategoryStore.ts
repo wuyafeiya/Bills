@@ -4,6 +4,18 @@ import type { CustomCategory, Tag } from '../types/category'
 const CATEGORIES_STORAGE_KEY = 'bill_custom_categories'
 const TAGS_STORAGE_KEY = 'bill_tags'
 
+// 旧枚举值到新分类ID的映射（用于兼容旧数据）
+const LEGACY_CATEGORY_MAP: Record<string, string> = {
+  'food': 'cat_food',
+  'transport': 'cat_transport',
+  'shopping': 'cat_shopping',
+  'entertainment': 'cat_entertainment',
+  'utilities': 'cat_utilities',
+  'health': 'cat_health',
+  'education': 'cat_education',
+  'other': 'cat_other_expense'
+}
+
 // 默认分类数据（只有支出分类）
 const DEFAULT_CATEGORIES: CustomCategory[] = [
   { id: 'cat_food', name: '餐饮', type: 'expense', color: '#ff922b', icon: 'utensils', isDefault: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -74,8 +86,10 @@ export function useCategoryStore() {
     initTags()
   }
 
-  // 计算属性：支出分类（所有分类都是支出）
-  const expenseCategories = computed(() => categories.value)
+  // 计算属性：支出分类
+  const expenseCategories = computed(() =>
+    categories.value.filter(cat => cat.type === 'expense')
+  )
 
   // 添加分类
   function addCategory(category: Omit<CustomCategory, 'id' | 'createdAt' | 'updatedAt'>) {
@@ -114,9 +128,17 @@ export function useCategoryStore() {
     return false
   }
 
-  // 根据 ID 获取分类
+  // 根据 ID 获取分类（兼容旧枚举值）
   function getCategoryById(id: string) {
-    return categories.value.find(cat => cat.id === id)
+    // 先尝试直接匹配
+    let category = categories.value.find(cat => cat.id === id)
+
+    // 如果没找到，尝试使用旧枚举值映射
+    if (!category && LEGACY_CATEGORY_MAP[id]) {
+      category = categories.value.find(cat => cat.id === LEGACY_CATEGORY_MAP[id])
+    }
+
+    return category
   }
 
   // 添加标签

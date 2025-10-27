@@ -75,7 +75,7 @@ export interface Bill {
   type: BillType
   title: string
   amount: number
-  category: BillCategory
+  category: string  // 改为字符串类型，存储分类ID（如 'cat_food' 或 'cat_1234567890'）
   date: string
   paymentMethod?: PaymentMethod  // 支付方式（可选）
   description?: string
@@ -92,7 +92,7 @@ export interface BillStats {
   monthExpense: number      // 本月支出
   yearExpense: number       // 本年支出
   categoryStats: {
-    category: BillCategory
+    category: string  // 改为字符串类型
     total: number
     count: number
     percentage: number
@@ -112,7 +112,7 @@ export interface DatabaseBill {
   type: BillType
   title: string
   amount: number
-  category: BillCategory
+  category: string  // 改为字符串类型，存储分类ID
   date: string
   payment_method?: PaymentMethod  // 注意：数据库使用 snake_case
   description?: string
