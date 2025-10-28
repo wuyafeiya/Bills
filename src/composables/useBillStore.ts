@@ -64,7 +64,8 @@ export function createBillStore() {
       const { data, error: fetchError } = await supabase
         .from('bills')
         .select('*')
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
@@ -147,8 +148,13 @@ export function createBillStore() {
       }))
       .sort((a, b) => b.total - a.total);
 
-    // 最近的账单（前5条）
-    const recentBills = [...bills.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
+    // 当天所有交易（按创建时间降序）
+    const recentBills = [...bills.value]
+      .filter((bill) => isToday(bill.date))
+      .sort((a, b) => {
+        // 按创建时间降序排序
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
 
     return {
       totalExpense,
@@ -184,10 +190,16 @@ export function createBillStore() {
     return data;
   });
 
-  // 计算属性：按日期排序的账单列表
+  // 计算属性：按日期和创建时间排序的账单列表
   const sortedBills = computed(() => {
     return [...bills.value].sort((a, b) => {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
+      // 首先按日期降序排序
+      const dateCompare = new Date(b.date).getTime() - new Date(a.date).getTime();
+      if (dateCompare !== 0) {
+        return dateCompare;
+      }
+      // 如果日期相同，按创建时间降序排序（最新创建的在前）
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   });
 

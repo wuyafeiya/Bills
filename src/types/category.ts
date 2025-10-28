@@ -1,4 +1,4 @@
-// 自定义分类接口
+// 自定义分类接口（应用格式，使用 camelCase）
 export interface CustomCategory {
   id: string
   name: string
@@ -8,6 +8,18 @@ export interface CustomCategory {
   isDefault: boolean         // 是否为默认分类
   createdAt: string
   updatedAt: string
+}
+
+// 数据库分类接口（数据库格式，使用 snake_case）
+export interface DatabaseCategory {
+  id: string
+  name: string
+  type: 'expense'
+  color: string
+  icon: string
+  is_default: boolean
+  created_at: string
+  updated_at: string
 }
 
 // 标签接口

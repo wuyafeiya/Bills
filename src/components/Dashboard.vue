@@ -108,10 +108,10 @@
       <TrendChart :trend-data="trendData" />
     </div>
 
-    <!-- 最近账单 -->
+    <!-- 今日交易 -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-gray-800">最近账单</h3>
+        <h3 class="text-lg font-bold text-gray-800">今日交易</h3>
         <button
           @click="emit('viewAllBills')"
           class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1"
@@ -140,7 +140,7 @@
             <div>
               <div class="font-semibold text-gray-800">{{ bill.title }}</div>
               <div class="text-sm text-gray-500">
-                {{ formatDate(bill.date) }} · {{ getCategoryLabel(bill.category) }}
+                {{ formatTime(bill.createdAt) }} · {{ getCategoryLabel(bill.category) }}
               </div>
             </div>
           </div>
@@ -155,7 +155,7 @@
 
       <div v-else class="text-center py-12 text-gray-400">
         <font-awesome-icon :icon="['fas', 'receipt']" class="text-4xl mb-2 opacity-50" />
-        <p>暂无账单记录</p>
+        <p>今天还没有交易记录</p>
       </div>
     </div>
   </div>
@@ -182,6 +182,13 @@ const balance = computed(() => stats.value.totalIncome - stats.value.totalExpens
 function getCategoryLabel(categoryId: string) {
   const category = getCategoryById(categoryId)
   return category?.name || '未知分类'
+}
+
+function formatTime(dateString: string) {
+  const date = new Date(dateString)
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  return `${hours}:${minutes}`
 }
 
 function formatDate(dateString: string) {

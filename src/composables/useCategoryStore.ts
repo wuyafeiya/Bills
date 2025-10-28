@@ -1,8 +1,10 @@
-import { ref, computed } from 'vue'
-import type { CustomCategory, Tag } from '../types/category'
+import { ref, computed, onMounted } from 'vue'
+import type { CustomCategory, DatabaseCategory, Tag } from '../types/category'
+import { supabase } from '../lib/supabase'
 
-const CATEGORIES_STORAGE_KEY = 'bill_custom_categories'
 const TAGS_STORAGE_KEY = 'bill_tags'
+const MIGRATION_FLAG_KEY = 'categories_migrated_to_supabase'
+const OLD_CATEGORIES_KEY = 'bill_custom_categories'
 
 // 旧枚举值到新分类ID的映射（用于兼容旧数据）
 const LEGACY_CATEGORY_MAP: Record<string, string> = {
@@ -14,6 +16,45 @@ const LEGACY_CATEGORY_MAP: Record<string, string> = {
   'health': 'cat_health',
   'education': 'cat_education',
   'other': 'cat_other_expense'
+}
+
+// 转换函数：数据库格式 -> 应用格式
+function dbCategoryToCategory(dbCategory: DatabaseCategory): CustomCategory {
+  return {
+    id: dbCategory.id,
+    name: dbCategory.name,
+    type: dbCategory.type,
+    color: dbCategory.color,
+    icon: dbCategory.icon,
+    isDefault: dbCategory.is_default,
+    createdAt: dbCategory.created_at,
+    updatedAt: dbCategory.updated_at,
+  }
+}
+
+// 转换函数：应用格式 -> 数据库格式
+function categoryToDbCategory(category: Partial<CustomCategory>): Partial<DatabaseCategory> {
+  const dbCategory: Partial<DatabaseCategory> = {
+    name: category.name,
+    type: category.type,
+    color: category.color,
+    icon: category.icon,
+  }
+
+  if (category.id !== undefined) {
+    dbCategory.id = category.id
+  }
+  if (category.isDefault !== undefined) {
+    dbCategory.is_default = category.isDefault
+  }
+  if (category.createdAt !== undefined) {
+    dbCategory.created_at = category.createdAt
+  }
+  if (category.updatedAt !== undefined) {
+    dbCategory.updated_at = category.updatedAt
+  }
+
+  return dbCategory
 }
 
 // 默认分类数据（只有支出分类）
@@ -32,21 +73,99 @@ const DEFAULT_CATEGORIES: CustomCategory[] = [
 const categories = ref<CustomCategory[]>([])
 // 标签数据
 const tags = ref<Tag[]>([])
+// 加载状态
+const loading = ref(false)
+const error = ref<string | null>(null)
 
-// 初始化分类数据
-function initCategories() {
-  const stored = localStorage.getItem(CATEGORIES_STORAGE_KEY)
-  if (stored) {
-    try {
-      categories.value = JSON.parse(stored)
-    } catch (e) {
-      console.error('Failed to parse categories from localStorage', e)
-      categories.value = [...DEFAULT_CATEGORIES]
-      saveCategories()
+// 从 Supabase 获取所有分类
+async function fetchCategories() {
+  loading.value = true
+  error.value = null
+
+  try {
+    const { data, error: fetchError } = await supabase
+      .from('categories')
+      .select('*')
+      .order('created_at', { ascending: true })
+
+    if (fetchError) throw fetchError
+
+    // 转换数据库格式到应用格式
+    categories.value = (data as DatabaseCategory[])?.map(dbCategoryToCategory) || []
+
+    // 如果数据库为空，初始化默认分类
+    if (categories.value.length === 0) {
+      await initializeDefaultCategories()
     }
-  } else {
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : '获取分类失败'
+    console.error('Error fetching categories:', err)
+    // 如果获取失败，使用默认分类
     categories.value = [...DEFAULT_CATEGORIES]
-    saveCategories()
+  } finally {
+    loading.value = false
+  }
+}
+
+// 初始化默认分类到数据库
+async function initializeDefaultCategories() {
+  try {
+    const dbCategories = DEFAULT_CATEGORIES.map(cat => categoryToDbCategory(cat))
+
+    const { error: insertError } = await supabase
+      .from('categories')
+      .insert(dbCategories)
+
+    if (insertError) throw insertError
+
+    categories.value = [...DEFAULT_CATEGORIES]
+  } catch (err) {
+    console.error('Error initializing default categories:', err)
+    categories.value = [...DEFAULT_CATEGORIES]
+  }
+}
+
+// 从 LocalStorage 迁移分类到 Supabase（仅执行一次）
+async function migrateFromLocalStorage() {
+  const migrated = localStorage.getItem(MIGRATION_FLAG_KEY)
+  if (migrated) return // 已经迁移过
+
+  const oldCategories = localStorage.getItem(OLD_CATEGORIES_KEY)
+  if (!oldCategories) {
+    // 没有旧数据，标记为已迁移
+    localStorage.setItem(MIGRATION_FLAG_KEY, 'true')
+    return
+  }
+
+  try {
+    const parsedCategories: CustomCategory[] = JSON.parse(oldCategories)
+
+    // 获取数据库中现有的分类ID
+    const { data: existingCategories } = await supabase
+      .from('categories')
+      .select('id')
+
+    const existingIds = new Set(existingCategories?.map(cat => cat.id) || [])
+
+    // 过滤出不存在的分类
+    const newCategories = parsedCategories.filter(cat => !existingIds.has(cat.id))
+
+    if (newCategories.length > 0) {
+      const dbCategories = newCategories.map(cat => categoryToDbCategory(cat))
+
+      const { error: insertError } = await supabase
+        .from('categories')
+        .insert(dbCategories)
+
+      if (insertError) throw insertError
+
+      console.log(`成功迁移 ${newCategories.length} 个分类到 Supabase`)
+    }
+
+    // 标记为已迁移
+    localStorage.setItem(MIGRATION_FLAG_KEY, 'true')
+  } catch (err) {
+    console.error('Error migrating categories:', err)
   }
 }
 
@@ -67,11 +186,6 @@ function initTags() {
   }
 }
 
-// 保存分类到 localStorage
-function saveCategories() {
-  localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories.value))
-}
-
 // 保存标签到 localStorage
 function saveTags() {
   localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(tags.value))
@@ -79,12 +193,17 @@ function saveTags() {
 
 export function useCategoryStore() {
   // 初始化数据
-  if (categories.value.length === 0) {
-    initCategories()
-  }
-  if (tags.value.length === 0) {
-    initTags()
-  }
+  onMounted(async () => {
+    if (categories.value.length === 0) {
+      // 先尝试迁移 LocalStorage 数据
+      await migrateFromLocalStorage()
+      // 然后从 Supabase 获取分类
+      await fetchCategories()
+    }
+    if (tags.value.length === 0) {
+      initTags()
+    }
+  })
 
   // 计算属性：支出分类
   const expenseCategories = computed(() =>
@@ -92,40 +211,108 @@ export function useCategoryStore() {
   )
 
   // 添加分类
-  function addCategory(category: Omit<CustomCategory, 'id' | 'createdAt' | 'updatedAt'>) {
-    const newCategory: CustomCategory = {
-      ...category,
-      id: `cat_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+  async function addCategory(category: Omit<CustomCategory, 'id' | 'createdAt' | 'updatedAt'>) {
+    loading.value = true
+    error.value = null
+
+    try {
+      const newCategory: CustomCategory = {
+        ...category,
+        id: `cat_${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+
+      // 转换为数据库格式
+      const dbCategory = categoryToDbCategory(newCategory)
+
+      const { data, error: insertError } = await supabase
+        .from('categories')
+        .insert([dbCategory])
+        .select()
+        .single()
+
+      if (insertError) throw insertError
+
+      if (data) {
+        // 转换回应用格式并添加到列表
+        categories.value.push(dbCategoryToCategory(data as DatabaseCategory))
+      }
+
+      return newCategory
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '添加分类失败'
+      console.error('Error adding category:', err)
+      throw err
+    } finally {
+      loading.value = false
     }
-    categories.value.push(newCategory)
-    saveCategories()
-    return newCategory
   }
 
   // 更新分类
-  function updateCategory(id: string, updates: Partial<CustomCategory>) {
-    const index = categories.value.findIndex(cat => cat.id === id)
-    if (index !== -1) {
-      categories.value[index] = {
-        ...categories.value[index],
+  async function updateCategory(id: string, updates: Partial<CustomCategory>) {
+    loading.value = true
+    error.value = null
+
+    try {
+      // 转换为数据库格式
+      const dbUpdates = categoryToDbCategory({
         ...updates,
         updatedAt: new Date().toISOString()
+      })
+
+      const { data, error: updateError } = await supabase
+        .from('categories')
+        .update(dbUpdates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (updateError) throw updateError
+
+      if (data) {
+        const index = categories.value.findIndex(cat => cat.id === id)
+        if (index !== -1) {
+          // 转换回应用格式
+          categories.value[index] = dbCategoryToCategory(data as DatabaseCategory)
+        }
       }
-      saveCategories()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '更新分类失败'
+      console.error('Error updating category:', err)
+      throw err
+    } finally {
+      loading.value = false
     }
   }
 
   // 删除分类（只能删除非默认分类）
-  function deleteCategory(id: string) {
+  async function deleteCategory(id: string) {
     const category = categories.value.find(cat => cat.id === id)
-    if (category && !category.isDefault) {
-      categories.value = categories.value.filter(cat => cat.id !== id)
-      saveCategories()
-      return true
+    if (!category || category.isDefault) {
+      return false
     }
-    return false
+
+    loading.value = true
+    error.value = null
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', id)
+
+      if (deleteError) throw deleteError
+
+      categories.value = categories.value.filter(cat => cat.id !== id)
+      return true
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '删除分类失败'
+      console.error('Error deleting category:', err)
+      throw err
+    } finally {
+      loading.value = false
+    }
   }
 
   // 根据 ID 获取分类（兼容旧枚举值）
@@ -189,9 +376,28 @@ export function useCategoryStore() {
   }
 
   // 重置为默认分类
-  function resetToDefaultCategories() {
-    categories.value = [...DEFAULT_CATEGORIES]
-    saveCategories()
+  async function resetToDefaultCategories() {
+    loading.value = true
+    error.value = null
+
+    try {
+      // 删除所有非默认分类
+      const { error: deleteError } = await supabase
+        .from('categories')
+        .delete()
+        .eq('is_default', false)
+
+      if (deleteError) throw deleteError
+
+      // 重新获取分类
+      await fetchCategories()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '重置分类失败'
+      console.error('Error resetting categories:', err)
+      throw err
+    } finally {
+      loading.value = false
+    }
   }
 
   return {
@@ -203,6 +409,9 @@ export function useCategoryStore() {
     deleteCategory,
     getCategoryById,
     resetToDefaultCategories,
+    fetchCategories,
+    loading: computed(() => loading.value),
+    error: computed(() => error.value),
 
     // 标签相关
     tags: computed(() => tags.value),
