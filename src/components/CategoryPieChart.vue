@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { NEmpty, NIcon } from 'naive-ui'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
@@ -59,6 +59,21 @@ const props = defineProps<{
 
 const { getCategoryById } = useCategoryStore()
 
+// 响应式窗口宽度
+const isMobile = ref(window.innerWidth < 768)
+
+function updateMobileState() {
+  isMobile.value = window.innerWidth < 768
+}
+
+onMounted(() => {
+  window.addEventListener('resize', updateMobileState)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateMobileState)
+})
+
 function getCategoryLabel(categoryId: string) {
   const category = getCategoryById(categoryId)
   return category?.name || '未知分类'
@@ -87,17 +102,18 @@ const chartOption = computed<EChartsOption>(() => {
       }
     },
     legend: {
-      orient: 'vertical',
-      right: '5%',
-      top: 'center',
-      itemGap: 12,
+      orient: isMobile.value ? 'horizontal' : 'vertical',
+      right: isMobile.value ? 'center' : '5%',
+      top: isMobile.value ? 'bottom' : 'center',
+      bottom: isMobile.value ? '0%' : 'auto',
+      itemGap: isMobile.value ? 8 : 12,
       textStyle: {
-        fontSize: 13
+        fontSize: isMobile.value ? 11 : 13
       },
       formatter: (name: string) => {
         const item = props.categoryStats.find(s => getCategoryLabel(s.category) === name)
         if (item) {
-          return `${name}: ¥${item.total.toFixed(2)}`
+          return isMobile.value ? name : `${name}: ¥${item.total.toFixed(2)}`
         }
         return name
       }
@@ -105,8 +121,8 @@ const chartOption = computed<EChartsOption>(() => {
     series: [
       {
         type: 'pie',
-        radius: ['40%', '65%'],
-        center: ['35%', '50%'],
+        radius: isMobile.value ? ['35%', '55%'] : ['40%', '65%'],
+        center: isMobile.value ? ['50%', '40%'] : ['35%', '50%'],
         avoidLabelOverlap: true,
         itemStyle: {
           borderRadius: 8,
@@ -119,19 +135,19 @@ const chartOption = computed<EChartsOption>(() => {
           formatter: (params: any) => {
             return `${params.percent.toFixed(1)}%`
           },
-          fontSize: 12,
+          fontSize: isMobile.value ? 11 : 12,
           fontWeight: 'bold'
         },
         labelLine: {
           show: true,
-          length: 15,
-          length2: 10,
+          length: isMobile.value ? 10 : 15,
+          length2: isMobile.value ? 5 : 10,
           smooth: true
         },
         emphasis: {
           label: {
             show: true,
-            fontSize: 14,
+            fontSize: isMobile.value ? 12 : 14,
             fontWeight: 'bold'
           },
           itemStyle: {
