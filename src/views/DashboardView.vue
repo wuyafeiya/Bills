@@ -244,7 +244,7 @@ const columns: DataTableColumns<Bill> = [
         {
           class: 'font-semibold'
         },
-        `-¥${row.amount.toFixed(2)}`
+        `¥${row.amount.toFixed(2)}`
       )
     }
   }
@@ -276,7 +276,7 @@ const mobileColumns: DataTableColumns<Bill> = [
         {
           class: 'font-semibold text-sm'
         },
-        `-¥${row.amount.toFixed(2)}`
+        `¥${row.amount.toFixed(2)}`
       )
     }
   }

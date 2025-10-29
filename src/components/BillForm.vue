@@ -63,13 +63,7 @@
 
       <!-- 日期 -->
       <n-form-item label="日期" path="date">
-        <n-date-picker
-          v-model:formatted-value="formData.date"
-          type="date"
-          value-format="yyyy-MM-dd"
-          style="width: 100%"
-          clearable
-        />
+        <IOSDatePicker v-model="formData.date" />
       </n-form-item>
 
       <!-- 支付方式 -->
@@ -246,20 +240,7 @@
 
     <!-- 日期 -->
     <n-form-item label="日期" path="date">
-      <n-date-picker
-        v-model:formatted-value="formData.date"
-        type="date"
-        value-format="yyyy-MM-dd"
-        style="width: 100%"
-        clearable
-        size="large"
-      >
-        <template #date-icon>
-          <n-icon>
-            <font-awesome-icon :icon="['fas', 'calendar-day']" />
-          </n-icon>
-        </template>
-      </n-date-picker>
+      <IOSDatePicker v-model="formData.date" />
     </n-form-item>
 
     <!-- 标签 -->
@@ -349,6 +330,7 @@ import {
 import { useBillStore } from '../composables/useBillStore'
 import { useCategoryStore } from '../composables/useCategoryStore'
 import { useResponsive } from '../composables/useResponsive'
+import IOSDatePicker from './IOSDatePicker.vue'
 import type { Bill } from '../types/bill'
 import {
   BillCategory,

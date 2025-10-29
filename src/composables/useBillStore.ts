@@ -61,11 +61,7 @@ export function createBillStore() {
     error.value = null;
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('bills')
-        .select('*')
-        .order('date', { ascending: false })
-        .order('created_at', { ascending: false });
+      const { data, error: fetchError } = await supabase.from('bills').select('*').order('date', { ascending: false }).order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
@@ -216,11 +212,7 @@ export function createBillStore() {
         updatedAt: new Date().toISOString(),
       });
 
-      const { data, error: insertError } = await supabase
-        .from('bills')
-        .insert([dbBill])
-        .select()
-        .single();
+      const { data, error: insertError } = await supabase.from('bills').insert([dbBill]).select().single();
 
       if (insertError) throw insertError;
 
@@ -249,12 +241,7 @@ export function createBillStore() {
         updatedAt: new Date().toISOString(),
       });
 
-      const { data, error: updateError } = await supabase
-        .from('bills')
-        .update(dbUpdates)
-        .eq('id', id)
-        .select()
-        .single();
+      const { data, error: updateError } = await supabase.from('bills').update(dbUpdates).eq('id', id).select().single();
 
       if (updateError) throw updateError;
 
@@ -280,10 +267,7 @@ export function createBillStore() {
     error.value = null;
 
     try {
-      const { error: deleteError } = await supabase
-        .from('bills')
-        .delete()
-        .eq('id', id);
+      const { error: deleteError } = await supabase.from('bills').delete().eq('id', id);
 
       if (deleteError) throw deleteError;
 

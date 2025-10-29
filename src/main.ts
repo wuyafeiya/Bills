@@ -82,7 +82,10 @@ import {
   faStar,
   faFlag,
   faImage,
-  faHistory
+  faHistory,
+  faSun,
+  faMoon,
+  faChevronDown
 } from '@fortawesome/free-solid-svg-icons'
 
 // Regular 风格图标（更细的线条）
@@ -169,7 +172,10 @@ library.add(
   faStar,
   faFlag,
   faImage,
-  faHistory
+  faHistory,
+  faSun,
+  faMoon,
+  faChevronDown
 )
 
 const app = createApp(App)
