@@ -27,6 +27,30 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/bill-overview',
+    name: 'BillOverview',
+    component: () => import('../views/BillOverviewView.vue'),
+    meta: {
+      title: '账单总览'
+    }
+  },
+  {
+    path: '/bill-overview/month',
+    name: 'MonthCategoryStats',
+    component: () => import('../views/MonthCategoryStatsView.vue'),
+    meta: {
+      title: '月度分类统计'
+    }
+  },
+  {
+    path: '/bill-overview/category',
+    name: 'CategoryBillList',
+    component: () => import('../views/CategoryBillListView.vue'),
+    meta: {
+      title: '分类账单详情'
+    }
+  },
+  {
     path: '/settings',
     name: 'Settings',
     component: () => import('../views/SettingsView.vue'),

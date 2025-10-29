@@ -73,6 +73,11 @@ const menuOptions: MenuOption[] = [
     icon: renderIcon('plus')
   },
   {
+    label: '账单总览',
+    key: '/bill-overview',
+    icon: renderIcon('chart-line')
+  },
+  {
     label: '设置',
     key: '/settings',
     icon: renderIcon('gear')

@@ -144,6 +144,9 @@ const breadcrumbMap: Record<string, string> = {
   '/': '首页',
   '/bills': '账单列表',
   '/add': '添加账单',
+  '/bill-overview': '账单总览',
+  '/bill-overview/month': '月度分类统计',
+  '/bill-overview/category': '分类账单详情',
   '/stats': '统计分析',
   '/settings': '设置'
 }
