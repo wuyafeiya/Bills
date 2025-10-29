@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>检查 LocalStorage</title>
+</head>
+<body>
+    <h2>分类数据检查</h2>
+    <button onclick="checkData()">检查数据</button>
+    <pre id="output"></pre>
+    
+    <script>
+    function checkData() {
+        const categories = localStorage.getItem('bill_custom_categories');
+        const bills = localStorage.getItem('bills');
+        
+        let output = '=== 分类数据 ===\n';
+        if (categories) {
+            output += JSON.stringify(JSON.parse(categories), null, 2);
+        } else {
+            output += '未找到分类数据\n';
+        }
+        
+        output += '\n\n=== 账单数据（仅显示分类ID） ===\n';
+        if (bills) {
+            const billData = JSON.parse(bills);
+            billData.forEach(bill => {
+                output += `账单: ${bill.title}, 分类ID: ${bill.category}\n`;
+            });
+        } else {
+            output += '未找到账单数据\n';
+        }
+        
+        document.getElementById('output').textContent = output;
+    }
+    </script>
+</body>
+</html>

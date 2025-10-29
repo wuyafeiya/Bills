@@ -62,9 +62,9 @@
       </n-form-item>
 
       <!-- 日期 -->
-      <n-form-item label="日期" path="date">
+      <!-- <n-form-item label="日期" path="date">
         <IOSDatePicker v-model="formData.date" />
-      </n-form-item>
+      </n-form-item> -->
 
       <!-- 支付方式 -->
       <n-form-item label="支付方式">
