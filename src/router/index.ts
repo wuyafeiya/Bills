@@ -59,6 +59,14 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/todo-planner',
+    name: 'TodoPlanner',
+    component: () => import('../views/TodoPlannerView.vue'),
+    meta: {
+      title: '每日计划'
+    }
+  },
+  {
     path: '/settings',
     name: 'Settings',
     component: () => import('../views/SettingsView.vue'),

@@ -83,6 +83,11 @@ const menuOptions: MenuOption[] = [
     icon: renderIcon('utensils')
   },
   {
+    label: '每日计划',
+    key: '/todo-planner',
+    icon: renderIcon('list-check')
+  },
+  {
     label: '设置',
     key: '/settings',
     icon: renderIcon('gear')

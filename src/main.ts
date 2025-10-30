@@ -98,7 +98,12 @@ import {
   faTrashAlt,
   faCheck,
   faTimesCircle,
-  faCalendarPlus
+  faCalendarPlus,
+  faListCheck,
+  faHourglassHalf,
+  faClipboardList,
+  faClock,
+  faCircle
 } from '@fortawesome/free-solid-svg-icons'
 
 // Regular 风格图标（更细的线条）
@@ -201,7 +206,12 @@ library.add(
   faTrashAlt,
   faCheck,
   faTimesCircle,
-  faCalendarPlus
+  faCalendarPlus,
+  faListCheck,
+  faHourglassHalf,
+  faClipboardList,
+  faClock,
+  faCircle
 )
 
 const app = createApp(App)
