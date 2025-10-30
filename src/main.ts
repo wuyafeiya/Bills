@@ -85,7 +85,20 @@ import {
   faHistory,
   faSun,
   faMoon,
-  faChevronDown
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+  faPen,
+  faBowlFood,
+  faPlusCircle,
+  faLightbulb,
+  faCommentDots,
+  faStickyNote,
+  faDrumstickBite,
+  faTrashAlt,
+  faCheck,
+  faTimesCircle,
+  faCalendarPlus
 } from '@fortawesome/free-solid-svg-icons'
 
 // Regular 风格图标（更细的线条）
@@ -175,7 +188,20 @@ library.add(
   faHistory,
   faSun,
   faMoon,
-  faChevronDown
+  faChevronDown,
+  faChevronLeft,
+  faChevronRight,
+  faPen,
+  faBowlFood,
+  faPlusCircle,
+  faLightbulb,
+  faCommentDots,
+  faStickyNote,
+  faDrumstickBite,
+  faTrashAlt,
+  faCheck,
+  faTimesCircle,
+  faCalendarPlus
 )
 
 const app = createApp(App)

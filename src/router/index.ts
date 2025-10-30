@@ -51,6 +51,14 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/recipe-planner',
+    name: 'RecipePlanner',
+    component: () => import('../views/RecipePlannerView.vue'),
+    meta: {
+      title: '食谱计划'
+    }
+  },
+  {
     path: '/settings',
     name: 'Settings',
     component: () => import('../views/SettingsView.vue'),

@@ -78,6 +78,11 @@ const menuOptions: MenuOption[] = [
     icon: renderIcon('chart-line')
   },
   {
+    label: '食谱计划',
+    key: '/recipe-planner',
+    icon: renderIcon('utensils')
+  },
+  {
     label: '设置',
     key: '/settings',
     icon: renderIcon('gear')

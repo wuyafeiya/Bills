@@ -12,7 +12,7 @@ function dbBillToBill(dbBill: DatabaseBill): Bill {
     id: dbBill.id,
     type: dbBill.type,
     title: dbBill.title,
-    amount: dbBill.amount,
+    amount: Number(dbBill.amount), // 确保 amount 是数字类型
     category: dbBill.category,
     date: dbBill.date,
     paymentMethod: dbBill.payment_method,
@@ -125,14 +125,31 @@ export function createBillStore() {
     const yearExpense = expenseBills.filter((bill) => isThisYear(bill.date)).reduce((sum, bill) => sum + bill.amount, 0);
 
     // 按分类统计（仅支出）
-    const categoryMap = new Map<string, { total: number; count: number }>();
+    const categoryMap = new Map<string, { total: number; count: number; bills: Bill[] }>();
 
     expenseBills.forEach((bill) => {
-      const current = categoryMap.get(bill.category) || { total: 0, count: 0 };
+      const current = categoryMap.get(bill.category) || { total: 0, count: 0, bills: [] };
       categoryMap.set(bill.category, {
         total: current.total + bill.amount,
         count: current.count + 1,
+        bills: [...current.bills, bill]
       });
+    });
+
+    // 调试：打印每个分类的详细信息
+    console.log('=== 分类统计调试信息 ===');
+    categoryMap.forEach((data, categoryId) => {
+      console.log(`分类ID: ${categoryId}`);
+      console.log(`  笔数: ${data.count}`);
+      console.log(`  账单详情:`, data.bills.map(b => ({
+        title: b.title,
+        amount: b.amount,
+        type: b.type,
+        category: b.category
+      })));
+      console.log(`  计算总额: ${data.total}`);
+      console.log(`  验证总额: ${data.bills.reduce((sum, b) => sum + b.amount, 0)}`);
+      console.log('---');
     });
 
     const categoryStats = Array.from(categoryMap.entries())

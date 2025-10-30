@@ -89,6 +89,7 @@ const menuItems: MenuItem[] = [
   { path: '/bills', label: '账单列表', icon: 'list' },
   { path: '/add', label: '添加账单', icon: 'plus' },
   { path: '/bill-overview', label: '账单总览', icon: 'chart-line' },
+  { path: '/recipe-planner', label: '食谱计划', icon: 'utensils' },
   { path: '/settings', label: '设置', icon: 'gear' }
 ]
 
